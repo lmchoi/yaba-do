@@ -8,8 +8,27 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
 	"github.com/spf13/cobra"
 )
+
+func createDirectories(cmd *cobra.Command, args []string) {
+	projectName := args[0]
+	
+	// Create directories
+	dirs := []string{
+		filepath.Join(projectName, "src"),
+		filepath.Join(projectName, "test"),
+	}
+	
+	// Set file permissions so that owner have full access and group and others can read and execute
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			fmt.Printf("Error creating directory %s: %v\n", dir, err)
+			return
+		}
+	}
+}
 
 // cljCmd represents the clj command
 var cljCmd = &cobra.Command{
@@ -19,23 +38,7 @@ var cljCmd = &cobra.Command{
 - src/
 - test/`,
 	Args: cobra.ExactArgs(1), // Requires exactly 1 argument (project name)
-	Run: func(cmd *cobra.Command, args []string) {
-		projectName := args[0]
-		
-		// Create directories
-		dirs := []string{
-			filepath.Join(projectName, "src"),
-			filepath.Join(projectName, "test"),
-		}
-		
-		// Set file permissions so that owner have full access and group and others can read and execute
-		for _, dir := range dirs {
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				fmt.Printf("Error creating directory %s: %v\n", dir, err)
-				return
-			}
-		}
-	},
+	Run: createDirectories,
 }
 
 func init() {
