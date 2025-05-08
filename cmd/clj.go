@@ -6,22 +6,35 @@ package cmd
 
 import (
 	"fmt"
-
+	"os"
+	"path/filepath"
 	"github.com/spf13/cobra"
 )
 
 // cljCmd represents the clj command
 var cljCmd = &cobra.Command{
-	Use:   "clj",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "clj [project-name]",
+	Short: "Create a new Clojure (deps.edn) project",
+	Long: `Creates a basic Clojure project structure with:
+- src/
+- test/`,
+	Args: cobra.ExactArgs(1), // Requires exactly 1 argument (project name)
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("clj called")
+		projectName := args[0]
+		
+		// Create directories
+		dirs := []string{
+			filepath.Join(projectName, "src"),
+			filepath.Join(projectName, "test"),
+		}
+		
+		// Set file permissions so that owner have full access and group and others can read and execute
+		for _, dir := range dirs {
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				fmt.Printf("Error creating directory %s: %v\n", dir, err)
+				return
+			}
+		}
 	},
 }
 
