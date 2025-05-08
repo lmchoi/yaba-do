@@ -14,6 +14,12 @@ import (
 
 func createDirectories(cmd *cobra.Command, args []string) {
 	projectName := args[0]
+
+	// Check if project directory already exists
+	if _, err := os.Stat(projectName); err == nil {
+		fmt.Printf("aborting: directory '%s' already exists\n", projectName)
+		return
+	}
 	
 	// Create directories
 	dirs := []string{
