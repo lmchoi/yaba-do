@@ -8,9 +8,57 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/spf13/cobra"
 )
+
+type TemplateData struct {
+	Namespace   string
+}
+
+func createFiles(projectName string) {
+	data := TemplateData{
+		Namespace:   projectName,
+	}
+
+	// Define template files to generate
+	templates := []struct {
+		templatePath string
+		outputPath   string
+	}{
+		{
+			"templates/clojure/base/src/core.clj",
+			filepath.Join(projectName, "src", "core.clj"),
+		},
+		{
+			"templates/clojure/base/test/core_test.clj",
+			filepath.Join(projectName, "test", "core_test.clj"),
+		},
+	}
+
+	// Create files
+	for _, tmpl := range templates {
+		// Parse and execute template
+		t, err := template.ParseFiles(tmpl.templatePath)
+		if err != nil {
+			fmt.Printf("Error parsing template: %v\n", err)
+			return
+		}
+
+		file, err := os.Create(tmpl.outputPath)
+		if err != nil {
+			fmt.Printf("Error creating file: %v\n", err)
+			return
+		}
+		defer file.Close()
+
+		if err := t.Execute(file, data); err != nil {
+			fmt.Printf("Error executing template: %v\n", err)
+			return
+		}
+	}
+}
 
 func createDirectories(cmd *cobra.Command, args []string) {
 	projectName := args[0]
@@ -34,6 +82,9 @@ func createDirectories(cmd *cobra.Command, args []string) {
 			return
 		}
 	}
+
+	// Create files
+	createFiles(projectName)
 }
 
 // cljCmd represents the clj command
